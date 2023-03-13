@@ -1,6 +1,7 @@
+from typing import Tuple
+
 import cv2
 import numpy as np
-from typing import Tuple
 
 from ..fbwriter import FBWriter
 
@@ -26,7 +27,7 @@ class OpenCV(FBWriter):
 
     def shape(self):
         return self._shape
-    
+
     def dtype(self):
         return self._dtype
 

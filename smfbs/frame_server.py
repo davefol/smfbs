@@ -1,10 +1,12 @@
-from waitress import serve
-from multiprocessing import shared_memory
-from flask import Flask, Response
 import time
+from multiprocessing import shared_memory
+
 import cv2
-from .smfbs import SMFBS
 import numpy as np
+from flask import Flask, Response
+from waitress import serve
+
+from .smfbs import SMFBS
 
 
 class FrameServer:
@@ -17,7 +19,7 @@ class FrameServer:
     def serve_frames(self, name: str, encoding: str) -> Response:
         def yield_frames(name: str, encoding: str):
             shm = shared_memory.SharedMemory(name=name)
-            shape, dtype, _, framerate = self.smfbs.frame_buffers[name]
+            shape, dtype, _, framerate, _ = self.smfbs.frame_buffers[name]
             buffer = np.ndarray(shape, dtype, buffer=shm.buf)
             while True:
                 time.sleep(1 / framerate.value)
@@ -27,6 +29,7 @@ class FrameServer:
                     + cv2.imencode(encoding, buffer)[1].tobytes()
                     + b"\r\n"
                 )
+
         return Response(
             yield_frames(name, encoding),
             mimetype="multipart/x-mixed-replace; boundary=frame",
