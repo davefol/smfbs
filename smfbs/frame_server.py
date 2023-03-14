@@ -22,7 +22,7 @@ class FrameServer:
             shape, dtype, _, framerate, _ = self.smfbs.frame_buffers[name]
             buffer = np.ndarray(shape, dtype, buffer=shm.buf)
             while True:
-                time.sleep(1 / framerate.value)
+                #time.sleep(1 / framerate.value)
                 yield (
                     b"--frame\r\n"
                     b"Content-Type: image/jpeg\r\n\r\n"
