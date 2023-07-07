@@ -63,6 +63,7 @@ class Lucid(FBWriter):
             buffer=array,
             dtype=np.uint8,
             shape=(item.height, item.width, buffer_bytes_per_pixel),
+        ).copy()
         if rot90:
             frame = np.rot90(frame, k=3)
         BufferFactory.destroy(item)
