@@ -15,8 +15,10 @@ class OpenCV(FBWriter):
     def initialize(self):
         self.cap = cv2.VideoCapture(self.index)
 
-    def update(self, buffer):
+    def update(self, buffer, rot90=False):
         success, frame = self.cap.read()
+        if rot90:
+            frame = np.rot90(frame)
         if not success:
             raise RuntimeError("Failed to get frame")
 

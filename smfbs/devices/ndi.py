@@ -37,7 +37,7 @@ class NDI(FBWriter):
         ndi.find_destroy(ndi_find)
 
 
-    def update(self, buffer):
+    def update(self, buffer, rot90=False):
         while True:
             t, v, _, _ = ndi.recv_capture_v2(self.ndi_recv, 5000)
             if t == ndi.FRAME_TYPE_VIDEO:

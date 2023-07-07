@@ -6,6 +6,7 @@ import numpy as np
 from flask import Flask, Response
 from waitress import serve
 
+from turbojpeg import TurboJPEG, TJPF_BGR, TJPF_GRAY, TJSAMP_GRAY, TJSAMP_422, TJPF_BGRA
 from .smfbs import SMFBS
 
 
@@ -17,18 +18,34 @@ class FrameServer:
         serve(self.app, host="0.0.0.0", port=port, threads=threads)
 
     def serve_frames(self, name: str, encoding: str) -> Response:
-        def yield_frames(name: str, encoding: str):
+        if encoding == "info":
             shm = shared_memory.SharedMemory(name=name)
             shape, dtype, _, framerate, _ = self.smfbs.frame_buffers[name]
-            buffer = np.ndarray(shape, dtype, buffer=shm.buf)
+            return {
+                "framerate": framerate.value,
+                "shape": shape,
+                "dtype": np.dtype(dtype).char,
+            }
+
+        def yield_frames(name: str, encoding: str):
+            jpeg = TurboJPEG(r"C:\libjpeg-turbo-gcc64\bin\libturbojpeg.dll")
+            shm = shared_memory.SharedMemory(name=name+"_JPEG")
+            buffer = shm.buf
+
             while True:
-                #time.sleep(1 / framerate.value)
+                current_time = time.time()
+                size = int.from_bytes(buffer[:4], "big")
+                img = buffer[4:4+size]
                 yield (
                     b"--frame\r\n"
                     b"Content-Type: image/jpeg\r\n\r\n"
-                    + cv2.imencode(encoding, buffer)[1].tobytes()
-                    + b"\r\n"
+                    #+ cv2.imencode(encoding, buffer)[1].tobytes()
+                    #+ jpeg.encode(buffer, pixel_format=pixel_format, jpeg_subsample=jpeg_subsample, quality=70)
+                    + img
+                    + b"END\r\n"
                 )
+                time.sleep(max((1/15) - (time.time() - current_time), 0))
+
 
         return Response(
             yield_frames(name, encoding),

@@ -14,7 +14,7 @@ class FBWriter(ABC):
         pass
 
     @abstractmethod
-    def update(self, buffer) -> Optional[np.ndarray]:
+    def update(self, buffer, rot90) -> Optional[np.ndarray]:
         """
         Called to update the frame buffer. If buffer is None,
         returns the data that would have been copied into buffer.

@@ -10,7 +10,8 @@ setup(
         "opencv-python>=4.7.0.0",
         "Flask>=2.2.0",
         "waitress>=2.1.0",
-        "ndi-python>=5.1.1.0"
+        "ndi-python>=5.1.1.0",
+        "PyTurboJPEG>=1.7.1"
     ],
     packages=find_packages(),
 )
