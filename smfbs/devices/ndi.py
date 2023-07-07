@@ -43,7 +43,6 @@ class NDI(FBWriter):
             if t == ndi.FRAME_TYPE_VIDEO:
                 if buffer is None:
                     buffer = np.copy(v.data)
-                    print(buffer.shape)
                     ndi.recv_free_video_v2(self.ndi_recv, v)
                     return buffer
                 else:
