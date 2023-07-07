@@ -74,10 +74,11 @@ class SMFBS:
         )
 
     def start(self):
-        for _, _, process, _, status in self.frame_buffers.values():
+        for name, (_, _, process, _, status) in self.frame_buffers.items():
+            print(f"Init Camera {name}")
             process.start()
             status.get()
-            print("done")
+            print(f"Done Camera {name}")
 
     def stop(self):
         for _, _, process, _, _ in self.frame_buffers.values():
