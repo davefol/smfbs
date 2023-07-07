@@ -51,7 +51,7 @@ class Lucid(FBWriter):
         nodes["Height"].value = self.height
         self.device.start_stream()
 
-    def update(self, buffer):
+    def update(self, buffer, rot90=False):
         d_buffer = self.device.get_buffer()
         item = BufferFactory.copy(d_buffer)
         self.device.requeue_buffer(d_buffer)
