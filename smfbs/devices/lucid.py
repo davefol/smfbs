@@ -20,10 +20,31 @@ def ip_to_int(ipaddress) -> int:
 
 
 class Lucid(FBWriter):
-    def __init__(self, ip_address: str, height: Optional[int], width: Optional[int]):
+    def __init__(
+        self,
+        ip_address: str,
+        height: Optional[int],
+        width: Optional[int],
+        offset_y: Optional[int],
+        offset_x: Optional[int],
+        exposure_us: float,
+        frame_rate: float,
+        gain: float,
+        gamma: float,
+        reverse_x: bool = False,
+        reverse_y: bool = False,
+    ):
         self.ip_address = ip_address
         self.height = height
         self.width = width
+        self.offset_y = offset_y
+        self.offset_x = offset_x
+        self.exposure_us = exposure_us
+        self.gain = gain
+        self.gamma = gamma
+        self.frame_rate = frame_rate
+        self.reverse_x = reverse_x
+        self.reverse_y = reverse_y
 
     def initialize(self):
         device_infos = system.device_infos
@@ -37,7 +58,22 @@ class Lucid(FBWriter):
 
         nodemap = self.device.nodemap
         tl_stream_nodemap = self.device.tl_stream_nodemap
-        nodes = self.device.nodemap.get_node(["Width", "Height"])
+        nodes = self.device.nodemap.get_node(
+            [
+                "Width",
+                "Height",
+                "OffsetY",
+                "OffsetX",
+                "ExposureAuto",
+                "ExposureTime",
+                "Gain",
+                "Gamma",
+                "GammaEnable",
+                "AcquisitionFrameRate",
+                "ReverseX",
+                "ReverseY",
+            ]
+        )
 
         # Set features before streaming.-------------------------------------------
         initial_acquisition_mode = nodemap.get_node("AcquisitionMode").value
@@ -47,8 +83,23 @@ class Lucid(FBWriter):
         tl_stream_nodemap["StreamPacketResendEnable"].value = True
         self.width = self.width or nodes["Width"].max
         self.height = self.height or nodes["Height"].max
+        self.offset_y = self.offset_y or 0
+        self.offset_x = self.offset_x or 0
+        self.exposure_us = self.exposure_us or 10000
+        self.gamma = self.gamma or 1
+        self.frame_rate = self.frame_rate or 15
         nodes["Width"].value = self.width
         nodes["Height"].value = self.height
+        nodes["OffsetY"].value = self.offset_y
+        nodes["OffsetX"].value = self.offset_x
+        nodes["ExposureAuto"].value = "Off"
+        nodes["ExposureTime"].value = float(self.exposure_us)
+        nodes["Gain"].value = float(self.gain)
+        nodes["GammaEnable"].value = True 
+        nodes["Gamma"].value = float(self.gamma)
+        nodes["AcquisitionFrameRate"] = float(self.frame_rate)
+        nodes["ReverseX"].value = self.reverse_x
+        nodes["ReverseY"].value = self.reverse_y
         self.device.start_stream()
 
     def update(self, buffer, rot90=False):
