@@ -125,7 +125,7 @@ class Lucid(FBWriter):
             np.copyto(buffer, frame)
 
     def shape(self):
-        return (self.height, self.width)
+        return (self.height, self.width, 1)
 
     def dtype(self):
         return np.dtype("B")
