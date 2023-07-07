@@ -1,13 +1,14 @@
 import ctypes
 from typing import Optional, Tuple
 
-import cv2
 import numpy as np
 from arena_api.buffer import BufferFactory
 from arena_api.system import system
 
 from ..fbwriter import FBWriter
 
+class DeviceNotFoundError(FileNotFoundError):
+    pass
 
 def ip_to_int(ipaddress) -> int:
     ipaddress = [int(x) for x in ipaddress.split(".")]
@@ -25,12 +26,15 @@ class Lucid(FBWriter):
         self.width = width
 
     def initialize(self):
-        devices = system.create_device()
-        for device in devices:
-            if device.nodemap["GevCurrentIPAddress"].value == ip_to_int(self.ip_address):
-                self.device = device
-            else:
-                system.destroy_device(device)
+        device_infos = system.device_infos
+        if len(device_infos) == 0:
+            raise DeviceNotFoundError("Found zero devices through the Arena API. Please check device connections and try again.")
+
+        for device in device_infos:
+            if device["ip"] == self.ip_address:
+                self.device = system.create_device(device)[0]
+                break
+
         nodemap = self.device.nodemap
         tl_stream_nodemap = self.device.tl_stream_nodemap
         nodes = self.device.nodemap.get_node(["Width", "Height"])
